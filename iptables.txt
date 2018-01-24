@@ -1,0 +1,45 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+iptables   所有规则 从上往下匹配  匹配成功就不会往下匹配了。
+
+1.iptables  -F                          //清除所有规则
+2.iptables  -L   -n  --line-number      //查看所有规则
+3.iptables  -A  INPUT  -j  DROP         //所有访问全部丢弃     并且没有应答
+4.iptables  -A  INPUT  -j  ACCEPT       //所有访问全部允许
+5.iptables  -A  INPUT  -j  REJECT       //所有访问阻止         会应答   无法连接端口
+6.iptables  -D  INPUT  1                //删除第一条 规则
+7.iptables  -P  INPUT  DROP             //设置默认规则阻止    ssh远程执行后，ssh无法连接。
+8.iptables  -P  INPUT  ACCEPT           //设置默认规则允许
+
+
+iptables :
+	-i 数据包进入网卡   一般只有一块网卡。（多块网卡用）
+	iptables  -A INPUT -i eth0 -j DROP       // eth0 网卡的阻止所有数据
+	iptables  -A INPUT -i lo   -j ACCEPT     // 网卡lo 允许所有数据进去网卡lo  内部网卡使用 数据库
+	-o 数据包出去网卡  
+	iptables  -A OUTPUT -o eth0 -j DROP       
+	iptables  -A OUTPUT -o lo   -j ACCEPT    // 网卡 lo 允许所有数据出去网卡lo  
+	
+	-s 源
+	-A 添加
+	-D 删除
+	-I 插入
+	-P(大写P)  设置默认规则
+	-p(小写p)  指定协议tcp、udp、icmp...
+	--sport    源端口
+	--dport    目标端口
+	
+iptables  -I  INPUT  -s 192.168.1.105  -j  DROP    //  插入一条规则
+iptables  -A  INPUT  -s 192.168.1.105  -j  ACCEPT  //  192.168.1.105  的访问允许
+iptables  -A  INPUT  -s 192.168.1.105  -j  DROP    //  192.168.1.105  的访问阻止掉
+iptables  -A  INPUT  -p tcp --dport  22 -j ACCEPT  // tcp 协议 端口22（ssh） 允许访问
+iptables  -A  INPUT  -p tcp --dport  22 -j DROP    // tcp 协议 端口22（ssh)  阻止访问
+												   // 80 端口 是web界面 。
+iptables  -A  INPUT  -p icmp -j DROP               // 禁止所有的ping
+
+service iptables  save   //保存iptables 设置，重启后有效。 
+禁止 iptables -P INPUT DROP 然后service iptables save												   
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+sudo ifconfig eth0 192.168.2.1 netmask 255.255.255.0    设置eth0 的ip地址和子网掩码 
+ip addr del 192.168.100.22/24 dev eth0                  删除ip
+sudo route add default gw 192.168.2.254                 设置网关
